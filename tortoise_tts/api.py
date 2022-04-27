@@ -198,7 +198,7 @@ class TextToSpeech:
         self.diffusion.load_state_dict(torch.load('.models/diffusion_decoder.pth', map_location=torch.device(device)))
 
         self.vocoder = UnivNetGenerator().cpu()
-        self.vocoder.load_state_dict(torch.load('.models/vocoder.pth')['model_g'], map_location=torch.device(device))
+        self.vocoder.load_state_dict(torch.load('.models/vocoder.pth')['model_g'], map_location=torch.device("cpu"))
         self.vocoder.eval(inference=True)
 
     def tts_with_preset(self, text, voice_samples, preset='fast', **kwargs):
