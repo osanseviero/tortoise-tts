@@ -6,6 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchaudio
 from tortoise_tts.models.xtransformers import ContinuousTransformerWrapper, RelativePositionBias
+from pathlib import Path
 
 
 def zero_module(module):
@@ -305,7 +306,7 @@ class TorchMelSpectrogram(nn.Module):
                                                              sample_rate=self.sampling_rate, f_min=self.mel_fmin,
                                                              f_max=self.mel_fmax, n_mels=self.n_mel_channels,
                                                              norm="slaney")
-        self.mel_norm_file = mel_norm_file
+        self.mel_norm_file = str(Path(__file__).parent.parent / Path(mel_norm_file)) 
         if self.mel_norm_file is not None:
             self.mel_norms = torch.load(self.mel_norm_file)
         else:
