@@ -7,7 +7,7 @@ import numpy as np
 from scipy.io.wavfile import read
 
 from tortoise_tts.utils.stft import STFT
-
+from pathlib import Path
 
 def load_wav_to_torch(full_path):
     sampling_rate, data = read(full_path)
@@ -82,10 +82,11 @@ def dynamic_range_decompression(x, C=1):
 
 
 def get_voices():
-    subs = os.listdir('voices')
+    voices_path = str(Path(__file__).parent.parent / Path("voices"))
+    subs = os.listdir(voices_path)
     voices = {}
     for sub in subs:
-        subj = os.path.join('voices', sub)
+        subj = os.path.join(voices_path, sub)
         if os.path.isdir(subj):
             voices[sub] = glob(f'{subj}/*.wav')
     return voices
