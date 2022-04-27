@@ -18,4 +18,7 @@ setup(
     name="tortoise_tts",
     packages=find_packages(),
     install_requires=install_requires,
+    package_data={
+        "": ["*.json", "*.pth", "*.txt"]
+    },
 )
