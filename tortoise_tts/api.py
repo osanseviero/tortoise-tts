@@ -170,7 +170,7 @@ class TextToSpeech:
     :param autoregressive_batch_size: Specifies how many samples to generate per batch. Lower this if you are seeing
                                       GPU OOM errors. Larger numbers generates slightly faster.
     """
-    def __init__(self, autoregressive_batch_size=16):
+    def __init__(self, autoregressive_batch_size=16, device="cpu"):
         self.autoregressive_batch_size = autoregressive_batch_size
         self.tokenizer = VoiceBpeTokenizer()
         download_models()
@@ -180,25 +180,25 @@ class TextToSpeech:
                                       heads=16, number_text_tokens=255, start_text_token=255, checkpointing=False,
                                       train_solo_embeddings=False,
                                       average_conditioning_embeddings=True).cpu().eval()
-        self.autoregressive.load_state_dict(torch.load('.models/autoregressive.pth'))
+        self.autoregressive.load_state_dict(torch.load('.models/autoregressive.pth', map_location=torch.device(device)))
 
         self.clvp = CLVP(dim_text=512, dim_speech=512, dim_latent=512, num_text_tokens=256, text_enc_depth=12,
                          text_seq_len=350, text_heads=8,
                          num_speech_tokens=8192, speech_enc_depth=12, speech_heads=8, speech_seq_len=430,
                          use_xformers=True).cpu().eval()
-        self.clvp.load_state_dict(torch.load('.models/clvp.pth'))
+        self.clvp.load_state_dict(torch.load('.models/clvp.pth', map_location=torch.device(device)))
 
         self.cvvp = CVVP(model_dim=512, transformer_heads=8, dropout=0, mel_codes=8192, conditioning_enc_depth=8, cond_mask_percentage=0,
                          speech_enc_depth=8, speech_mask_percentage=0, latent_multiplier=1).cpu().eval()
-        self.cvvp.load_state_dict(torch.load('.models/cvvp.pth'))
+        self.cvvp.load_state_dict(torch.load('.models/cvvp.pth', map_location=torch.device(device)))
 
         self.diffusion = DiffusionTts(model_channels=1024, num_layers=10, in_channels=100, out_channels=200,
                                       in_latent_channels=1024, in_tokens=8193, dropout=0, use_fp16=False, num_heads=16,
                                       layer_drop=0, unconditioned_percentage=0).cpu().eval()
-        self.diffusion.load_state_dict(torch.load('.models/diffusion_decoder.pth'))
+        self.diffusion.load_state_dict(torch.load('.models/diffusion_decoder.pth', map_location=torch.device(device)))
 
         self.vocoder = UnivNetGenerator().cpu()
-        self.vocoder.load_state_dict(torch.load('.models/vocoder.pth')['model_g'])
+        self.vocoder.load_state_dict(torch.load('.models/vocoder.pth')['model_g'], map_location=torch.device(device))
         self.vocoder.eval(inference=True)
 
     def tts_with_preset(self, text, voice_samples, preset='fast', **kwargs):
